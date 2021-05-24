@@ -124,6 +124,7 @@ var (
 		"plugin": plugin.Factory,
 	}
 
+	// 逻辑区分的后端储存
 	logicalBackends = map[string]logical.Factory{
 		"plugin":   plugin.Factory,
 		"database": logicalDb.Factory,
@@ -132,6 +133,7 @@ var (
 		"kv": logicalKv.Factory,
 	}
 
+	// 物理数据储存的后端储存
 	physicalBackends = map[string]physical.Factory{
 		"aerospike":              physAerospike.NewAerospikeBackend,
 		"alicloudoss":            physAliCloudOSS.NewAliCloudOSSBackend,
@@ -163,6 +165,7 @@ var (
 		"zookeeper":              physZooKeeper.NewZooKeeperBackend,
 	}
 
+	// 服务发现
 	serviceRegistrations = map[string]sr.Factory{
 		"consul":     csr.NewServiceRegistration,
 		"kubernetes": ksr.NewServiceRegistration,
@@ -576,11 +579,12 @@ func initCommands(ui, serverCmdUi cli.Ui, runOpts *RunOptions) {
 					tokenHelper: runOpts.TokenHelper,
 					flagAddress: runOpts.Address,
 				},
+				// 添加默认支持的储存
 				AuditBackends:      auditBackends,
 				CredentialBackends: credentialBackends,
 				LogicalBackends:    logicalBackends,
 				PhysicalBackends:   physicalBackends,
-
+				// 添加默认支持的服务发现
 				ServiceRegistrations: serviceRegistrations,
 
 				ShutdownCh: MakeShutdownCh(),

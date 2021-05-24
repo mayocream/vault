@@ -277,6 +277,7 @@ func EnsurePath(path string, dir bool) error {
 }
 
 // NewRaftBackend constructs a RaftBackend using the given directory
+// 创建 raft 物理储存后端
 func NewRaftBackend(conf map[string]string, logger log.Logger) (physical.Backend, error) {
 	path := os.Getenv(EnvVaultRaftPath)
 	if path == "" {
@@ -287,6 +288,7 @@ func NewRaftBackend(conf map[string]string, logger log.Logger) (physical.Backend
 		path = pathFromConfig
 	}
 
+	// 标记节点的 id, 有状态储存必须标记 id, 通过 id 区分储存的路径地址
 	var localID string
 	{
 		// Determine the local node ID from the environment.
@@ -299,6 +301,7 @@ func NewRaftBackend(conf map[string]string, logger log.Logger) (physical.Backend
 			localID = conf["node_id"]
 		}
 
+		// 查找本地文件
 		// If not set in the config check the "node-id" file.
 		if len(localID) == 0 {
 			localIDRaw, err := ioutil.ReadFile(filepath.Join(path, "node-id"))
@@ -313,6 +316,9 @@ func NewRaftBackend(conf map[string]string, logger log.Logger) (physical.Backend
 			}
 		}
 
+		// 创建一个随机的 node-id
+		// 这个策略适合在物理机上使用
+		// 不适合在容器环境中 (共享目录/储存文件不能持久化) 使用
 		// If all of the above fails generate a UUID and persist it to the
 		// "node-id" file.
 		if len(localID) == 0 {
@@ -330,6 +336,7 @@ func NewRaftBackend(conf map[string]string, logger log.Logger) (physical.Backend
 	}
 
 	// Create the FSM.
+	// 创建 raft FSM
 	fsm, err := NewFSM(path, localID, logger.Named("fsm"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create fsm: %v", err)

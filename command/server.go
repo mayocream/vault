@@ -77,6 +77,7 @@ const (
 	storageTypeConsul = "consul"
 )
 
+// ServerCommand implement cli.Commnd
 type ServerCommand struct {
 	*BaseCommand
 
@@ -484,11 +485,13 @@ func (c *ServerCommand) runRecoveryMode() int {
 	logProxyEnvironmentVariables(c.logger)
 
 	// Initialize the storage backend
+	// 该储存类型是否支持
 	factory, exists := c.PhysicalBackends[config.Storage.Type]
 	if !exists {
 		c.UI.Error(fmt.Sprintf("Unknown storage type %s", config.Storage.Type))
 		return 1
 	}
+	// 如果后端储存使用 raft
 	if config.Storage.Type == storageTypeRaft || (config.HAStorage != nil && config.HAStorage.Type == storageTypeRaft) {
 		if envCA := os.Getenv("VAULT_CLUSTER_ADDR"); envCA != "" {
 			config.ClusterAddr = envCA
@@ -960,9 +963,11 @@ func (c *ServerCommand) InitListeners(config *server.Config, disableClustering b
 	return 0, lns, clusterAddrs, nil
 }
 
+// Run runs vault server
 func (c *ServerCommand) Run(args []string) int {
 	f := c.Flags()
 
+	// parse flags
 	if err := f.Parse(args); err != nil {
 		c.UI.Error(err.Error())
 		return 1
@@ -1034,6 +1039,7 @@ func (c *ServerCommand) Run(args []string) int {
 		config.Listeners[0].Telemetry.UnauthenticatedMetricsAccess = true
 	}
 
+	// 解析配置文件
 	parsedConfig, err := c.parseConfig()
 	if err != nil {
 		c.UI.Error(err.Error())
@@ -1139,6 +1145,7 @@ func (c *ServerCommand) Run(args []string) int {
 				"in a Docker container, provide the IPC_LOCK cap to the container."))
 	}
 
+	// 遥测
 	inmemMetrics, metricSink, prometheusEnabled, err := configutil.SetupTelemetry(&configutil.SetupTelemetryOpts{
 		Config:      config.Telemetry,
 		Ui:          c.UI,
@@ -1154,6 +1161,7 @@ func (c *ServerCommand) Run(args []string) int {
 	metricsHelper := metricsutil.NewMetricsHelper(inmemMetrics, prometheusEnabled)
 
 	// Initialize the storage backend
+	// 初始化后端储存
 	backend, err := c.setupStorage(config)
 	if err != nil {
 		c.UI.Error(err.Error())

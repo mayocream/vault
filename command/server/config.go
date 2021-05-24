@@ -360,6 +360,7 @@ func LoadConfigFile(path string) (*Config, error) {
 	return conf, nil
 }
 
+// ParseConfig 解析 server config, 使用 HCL 语言
 func ParseConfig(d, source string) (*Config, error) {
 	// Parse!
 	obj, err := hcl.Parse(d)
@@ -461,6 +462,7 @@ func ParseConfig(d, source string) (*Config, error) {
 		return nil, fmt.Errorf("error parsing: file doesn't contain a root object")
 	}
 
+	// `backend` 是旧版的配置
 	// Look for storage but still support old backend
 	if o := list.Filter("storage"); len(o.Items) > 0 {
 		if err := ParseStorage(result, o, "storage"); err != nil {
@@ -585,6 +587,7 @@ func isTemporaryFile(name string) bool {
 		(strings.HasPrefix(name, "#") && strings.HasSuffix(name, "#")) // emacs
 }
 
+// ParseStorage 解析后端储存
 func ParseStorage(result *Config, list *ast.ObjectList, name string) error {
 	if len(list.Items) > 1 {
 		return fmt.Errorf("only one %q block is permitted", name)
