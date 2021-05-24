@@ -337,6 +337,7 @@ func NewRaftBackend(conf map[string]string, logger log.Logger) (physical.Backend
 
 	// Create the FSM.
 	// 创建 raft FSM
+	// localID 仅仅作为 Raft 的节点 ID
 	fsm, err := NewFSM(path, localID, logger.Named("fsm"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create fsm: %v", err)

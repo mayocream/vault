@@ -95,6 +95,7 @@ type FSM struct {
 }
 
 // NewFSM constructs a FSM using the given directory
+// 创建 FSM, 接收 path 储存路径, 节点id
 func NewFSM(path string, localID string, logger log.Logger) (*FSM, error) {
 	// Initialize the latest term, index, and config values
 	latestTerm := new(uint64)
@@ -784,6 +785,7 @@ func (f *FSM) Restore(r io.ReadCloser) error {
 		return err
 	}
 
+	// db 储存路径
 	dbPath := filepath.Join(f.path, databaseFilename)
 
 	f.logger.Info("installing snapshot to FSM")
